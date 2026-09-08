@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#7c5cfc" />
+  <meta name="description" content="DURRA — My Study & Life Planner" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="DURRA" />
+  <title>DURRA — My Study & Life Planner</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <link rel="icon" href="./icons/icon-192.png" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">My Study & Life Planner</p>
+        <h1>DURRA <span>دُرّة</span></h1>
+        <p id="todayLabel" class="muted"></p>
+      </div>
+      <button id="installBtn" class="install-btn hidden" type="button">⬇ تثبيت التطبيق</button>
+    </header>
+
+    <nav class="tabs" aria-label="التنقل الرئيسي">
+      <button class="tab active" data-view="home">🏠 الرئيسية</button>
+      <button class="tab" data-view="calendar">📅 التقويم</button>
+      <button class="tab" data-view="school">🎓 الدراسة</button>
+      <button class="tab" data-view="life">💜 حياتي</button>
+      <button class="tab" data-view="settings">⚙️ الإعدادات</button>
+    </nav>
+
+    <main>
+      <section id="view-home" class="view active">
+        <div class="hero card">
+          <div>
+            <p class="eyebrow">يوم جديد، خطوة جديدة ✨</p>
+            <h2 id="selectedDateTitle"></h2>
+          </div>
+          <div class="date-controls">
+            <button id="prevDay" class="icon-btn" aria-label="اليوم السابق">‹</button>
+            <button id="todayBtn" class="soft-btn">اليوم</button>
+            <button id="nextDay" class="icon-btn" aria-label="اليوم التالي">›</button>
+          </div>
+        </div>
+
+        <div class="grid two">
+          <section class="card">
+            <div class="section-head"><h3>✅ مهام اليوم</h3><span id="taskProgress" class="pill"></span></div>
+            <form id="taskForm" class="inline-form">
+              <input id="taskInput" maxlength="120" placeholder="أضيفي مهمة لهذا اليوم…" required />
+              <button class="primary-btn" type="submit">إضافة</button>
+            </form>
+            <div id="taskList" class="stack empty-aware"></div>
+          </section>
+
+          <section class="card">
+            <div class="section-head"><h3>🎯 هدف اليوم</h3><span class="pill">تركيز</span></div>
+            <textarea id="goalInput" rows="5" maxlength="500" placeholder="ما الشيء الأهم الذي تريدين إنجازه اليوم؟"></textarea>
+            <div class="actions-row">
+              <span id="goalStatus" class="muted small"></span>
+              <button id="saveGoal" class="primary-btn" type="button">حفظ الهدف</button>
+            </div>
+          </section>
+        </div>
+
+        <section class="card message-card">
+          <div class="section-head"><h3>💌 رسالة اليوم</h3><span class="pill">من القلب</span></div>
+          <blockquote id="dailyMessage"></blockquote>
+          <button id="archiveMessage" class="soft-btn" type="button">حفظ في الأرشيف</button>
+        </section>
+
+        <div class="grid three summary-grid">
+          <button class="summary-card" data-jump="calendar"><span>📅</span><b id="summaryEvents">0</b><small>أحداث هذا الشهر</small></button>
+          <button class="summary-card" data-jump="school"><span>📚</span><b id="summaryHomework">0</b><small>واجبات غير مكتملة</small></button>
+          <button class="summary-card" data-jump="school"><span>📝</span><b id="summaryExams">0</b><small>امتحانات قادمة</small></button>
+        </div>
+      </section>
+
+      <section id="view-calendar" class="view">
+        <section class="card">
+          <div class="calendar-head">
+            <button id="prevMonth" class="icon-btn">‹</button>
+            <div><p class="eyebrow">التقويم الشهري</p><h2 id="monthTitle"></h2></div>
+            <button id="nextMonth" class="icon-btn">›</button>
+          </div>
+          <div class="weekdays"><span>س</span><span>ح</span><span>ن</span><span>ث</span><span>ر</span><span>خ</span><span>ج</span></div>
+          <div id="calendarGrid" class="calendar-grid"></div>
+          <div class="legend"><span><i class="dot task-dot"></i> مهام/هدف</span><span><i class="dot hw-dot"></i> واجب</span><span><i class="dot exam-dot"></i> امتحان</span></div>
+        </section>
+      </section>
+
+      <section id="view-school" class="view">
+        <div class="grid two">
+          <section class="card">
+            <div class="section-head"><h3>📚 الواجبات الدراسية</h3><span id="hwCount" class="pill"></span></div>
+            <form id="homeworkForm" class="form-grid">
+              <input id="hwSubject" placeholder="المادة" maxlength="50" required />
+              <input id="hwTitle" placeholder="الواجب" maxlength="120" required />
+              <input id="hwDate" type="date" required />
+              <button class="primary-btn" type="submit">إضافة واجب</button>
+            </form>
+            <div id="homeworkList" class="stack"></div>
+          </section>
+
+          <section class="card">
+            <div class="section-head"><h3>📝 الامتحانات القادمة</h3><span id="examCount" class="pill"></span></div>
+            <form id="examForm" class="form-grid">
+              <input id="examSubject" placeholder="المادة" maxlength="50" required />
+              <input id="examTitle" placeholder="اسم الامتحان" maxlength="120" required />
+              <input id="examDate" type="date" required />
+              <button class="primary-btn" type="submit">إضافة امتحان</button>
+            </form>
+            <div id="examList" class="stack"></div>
+          </section>
+        </div>
+
+        <section class="card">
+          <div class="section-head"><h3>🗓️ الجدول الدراسي الأسبوعي</h3><span class="pill">يتكرر أسبوعيًا</span></div>
+          <div id="scheduleGrid" class="schedule-grid"></div>
+        </section>
+      </section>
+
+      <section id="view-life" class="view">
+        <div class="grid two">
+          <section class="card">
+            <div class="section-head"><h3>🗒️ ملاحظاتي</h3><span class="pill">خاصة بي</span></div>
+            <form id="noteForm" class="inline-form">
+              <input id="noteInput" maxlength="300" placeholder="أضيفي ملاحظة…" required />
+              <button class="primary-btn" type="submit">إضافة</button>
+            </form>
+            <div id="noteList" class="stack"></div>
+          </section>
+
+          <section class="card">
+            <div class="section-head"><h3>💌 أرشيف الرسائل</h3><span id="archiveCount" class="pill"></span></div>
+            <div id="messageArchive" class="stack"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="view-settings" class="view">
+        <div class="grid two">
+          <section class="card">
+            <h3>💾 النسخ الاحتياطي</h3>
+            <p class="muted">احتفظي بنسخة من كل بيانات DURRA، أو استعيدي نسخة سابقة.</p>
+            <div class="button-stack">
+              <button id="exportBtn" class="primary-btn" type="button">تنزيل نسخة احتياطية</button>
+              <label class="soft-btn file-label">استعادة نسخة احتياطية<input id="importInput" type="file" accept="application/json,.json" hidden /></label>
+            </div>
+            <p class="warning small">الاستعادة تستبدل بيانات DURRA الحالية بالكامل بعد التأكيد.</p>
+          </section>
+
+          <section class="card">
+            <h3>📱 التطبيق</h3>
+            <p class="muted">بعد رفع هذه النسخة على GitHub Pages عبر HTTPS يمكن تثبيت DURRA على الهاتف وفتحه كتطبيق مستقل.</p>
+            <div id="pwaStatus" class="status-box"></div>
+            <button id="installBtn2" class="primary-btn hidden" type="button">تثبيت DURRA</button>
+          </section>
+        </div>
+
+        <section class="card danger-zone">
+          <h3>🧹 إعادة ضبط البيانات</h3>
+          <p class="muted">يحذف كل بيانات DURRA من هذا الجهاز فقط.</p>
+          <button id="resetBtn" class="danger-btn" type="button">حذف كل البيانات</button>
+        </section>
+      </section>
+    </main>
+
+    <footer>صُمم بمحبة لدُرّة 💜 — DURRA FINAL</footer>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <dialog id="editDialog">
+    <form method="dialog" id="editForm" class="dialog-card">
+      <h3 id="editTitle">تعديل</h3>
+      <input id="editText" maxlength="300" />
+      <div class="dialog-actions">
+        <button value="cancel" class="soft-btn">إلغاء</button>
+        <button id="editSave" value="default" class="primary-btn">حفظ</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="./messages.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
