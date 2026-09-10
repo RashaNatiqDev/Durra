@@ -1,4 +1,4 @@
-const CACHE_NAME = 'durra-ai-tutor-v4-20260910-step3';
+const CACHE_NAME = 'durra-ai-tutor-v5-20260910-step4';
 
 const CORE_ASSETS = [
   './',

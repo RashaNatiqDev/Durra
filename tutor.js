@@ -21,7 +21,8 @@
     quizIndex: 0,
     quizScore: 0,
     quizLocked: false,
-    wrongIds: []
+    wrongIds: [],
+    englishUnit: null
   };
 
   const subjects = {
@@ -257,67 +258,60 @@
     document.getElementById('reviewQuiz')?.addEventListener('click', startQuiz);
   }
 
-  function englishPlaceholder() {
-    setLesson(`
-      <article class="lesson-card">
-        <div class="lesson-kicker">المرحلة القادمة</div>
-        <h4>🇬🇧 مدرس الإنكليزي</h4>
-        <p>بعد تثبيت نموذج الفيزياء، نضيف هنا: الكلمات، القواعد، القطع، أسئلة الاختيار، ومراجعة الكلمات التي تخطئين بها.</p>
-      </article>`);
-  }
-
-
-  const physicsChapters = [
-    'الفصل الأول: المتسعات',
-    'الفصل الثاني: الحث الكهرومغناطيسي',
-    'الفصل الثالث: التيار المتناوب',
-    'الفصل الرابع: الموجات الكهرومغناطيسية',
-    'الفصل الخامس: البصريات الفيزيائية',
-    'الفصل السادس: الفيزياء الحديثة',
-    'الفصل السابع: إلكترونيات الحالة الصلبة',
-    'الفصل الثامن: الأطياف الذرية والليزر',
-    'الفصل التاسع: النظرية النسبية',
-    'الفصل العاشر: الفيزياء النووية'
-  ];
-
-  function physicsHome() {
-    const cards = physicsChapters.map((name, i) => `
-      <button class="tutor-action physics-chapter" type="button" data-chapter="${i}">
-        ${i === 0 ? '✅ ' : '📘 '}${name}
-      </button>`).join('');
-    setLesson(`
-      <article class="lesson-card">
-        <div class="lesson-kicker">اختاري الفصل</div>
-        <h4>⚡ فصول الفيزياء</h4>
-        <div class="tutor-actions">${cards}</div>
-        <p class="small muted">الفصل الأول مفعّل الآن بالكامل. بقية الفصول جاهزة للإضافة بالتحديثات القادمة.</p>
-      </article>`);
-    document.querySelectorAll('.physics-chapter').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const i = Number(btn.dataset.chapter);
-        if (i === 0) physicsExplain();
-        else setLesson(`
-          <article class="lesson-card">
-            <div class="lesson-kicker">${physicsChapters[i]}</div>
-            <h4>📘 هذا الفصل موجود في القائمة</h4>
-            <p>سنضيف له الشرح والقوانين والأمثلة والاختبارات بالتحديثات القادمة، بدون تغيير التطبيق من الصفر.</p>
-            <button id="backPhysicsChapters" class="mini-cta" type="button">رجوع إلى الفصول</button>
-          </article>`);
-        document.getElementById('backPhysicsChapters')?.addEventListener('click', physicsHome);
-      });
-    });
-  }
-
-  const englishQuiz = [
-    { q: 'Choose the correct answer: She ___ to school every day.', options: ['go', 'goes', 'going', 'gone'], answer: 1, why: 'مع she في المضارع البسيط نضيف s للفعل: goes.' },
-    { q: 'What is the meaning of “important”?', options: ['مهم', 'سريع', 'صعب', 'قريب'], answer: 0, why: 'important = مهم.' },
-    { q: 'Choose the correct sentence.', options: ['He study English.', 'He studies English.', 'He studying English.', 'He studied English every day.'], answer: 1, why: 'في المضارع البسيط مع He نستخدم studies.' }
+  const englishUnits = [
+    'Unit 1 • الوحدة الأولى',
+    'Unit 2 • الوحدة الثانية',
+    'Unit 3 • الوحدة الثالثة',
+    'Unit 4 • الوحدة الرابعة',
+    'Unit 5 • الوحدة الخامسة',
+    'Unit 6 • الوحدة السادسة',
+    'Unit 7 • الوحدة السابعة',
+    'Unit 8 • الوحدة الثامنة',
+    'Literature • الأدب'
   ];
 
   function englishHome() {
+    state.englishUnit = null;
+    const cards = englishUnits.map((name, i) => `
+      <button class="tutor-action english-unit" type="button" data-unit="${i}">
+        ${i === 0 ? '✅ ' : i === 8 ? '📚 ' : '📘 '}${name}
+      </button>`).join('');
     setLesson(`
       <article class="lesson-card">
-        <div class="lesson-kicker">English Tutor</div>
+        <div class="lesson-kicker">اختاري الوحدة</div>
+        <h4>🇬🇧 وحدات اللغة الإنكليزية</h4>
+        <div class="tutor-actions">${cards}</div>
+        <p class="small muted">الوحدة الأولى مفعّلة الآن كنموذج كامل. بقية الوحدات والأدب موجودة بنفس النمط وجاهزة لإضافة محتواها بالتحديثات القادمة.</p>
+      </article>`);
+    document.querySelectorAll('.english-unit').forEach(btn => {
+      btn.addEventListener('click', () => englishUnitHome(Number(btn.dataset.unit)));
+    });
+  }
+
+  function englishUnitHome(unitIndex) {
+    state.englishUnit = unitIndex;
+    const name = englishUnits[unitIndex];
+    if (unitIndex !== 0) {
+      setLesson(`
+        <article class="lesson-card">
+          <div class="lesson-kicker">${name}</div>
+          <h4>${unitIndex === 8 ? '📚 الأدب الإنكليزي' : '🇬🇧 ' + name}</h4>
+          <p>هذه الوحدة موجودة الآن داخل النظام بنفس نمط الفيزياء. سنملأها بالتدريج: شرح، كلمات، قواعد، قراءة، أسئلة واختبار.</p>
+          <div class="tutor-actions">
+            <button class="tutor-action" type="button" disabled>📖 شرح</button>
+            <button class="tutor-action" type="button" disabled>🧠 كلمات</button>
+            <button class="tutor-action" type="button" disabled>📘 قواعد</button>
+            <button class="tutor-action" type="button" disabled>⚡ اختبار</button>
+          </div>
+          <button id="engBackUnits" class="mini-cta" type="button">رجوع إلى الوحدات</button>
+        </article>`);
+      document.getElementById('engBackUnits')?.addEventListener('click', englishHome);
+      return;
+    }
+
+    setLesson(`
+      <article class="lesson-card">
+        <div class="lesson-kicker">Unit 1 • الوحدة الأولى</div>
         <h4>🇬🇧 اختاري طريقة الدراسة</h4>
         <div class="tutor-actions">
           <button id="engWords" class="tutor-action" type="button">🧠 كلمات</button>
@@ -325,11 +319,13 @@
           <button id="engReading" class="tutor-action" type="button">📖 قراءة وفهم</button>
           <button id="engQuiz" class="tutor-action" type="button">⚡ اختبار سريع</button>
         </div>
+        <button id="engBackUnits" class="mini-cta" type="button">رجوع إلى الوحدات</button>
       </article>`);
     document.getElementById('engWords')?.addEventListener('click', englishWords);
     document.getElementById('engGrammar')?.addEventListener('click', englishGrammar);
     document.getElementById('engReading')?.addEventListener('click', englishReading);
     document.getElementById('engQuiz')?.addEventListener('click', englishStartQuiz);
+    document.getElementById('engBackUnits')?.addEventListener('click', englishHome);
   }
 
   function englishWords() {
@@ -345,7 +341,7 @@
         </div>
         <button id="engBackHome1" class="mini-cta" type="button">رجوع</button>
       </article>`);
-    document.getElementById('engBackHome1')?.addEventListener('click', englishHome);
+    document.getElementById('engBackHome1')?.addEventListener('click', () => englishUnitHome(0));
   }
 
   function englishGrammar() {
@@ -359,7 +355,7 @@
         <p class="memory-tip">🧠 تذكري: مع He / She / It غالبًا نضيف s أو es للفعل.</p>
         <button id="engBackHome2" class="mini-cta" type="button">رجوع</button>
       </article>`);
-    document.getElementById('engBackHome2')?.addEventListener('click', englishHome);
+    document.getElementById('engBackHome2')?.addEventListener('click', () => englishUnitHome(0));
   }
 
   function englishReading() {
@@ -372,7 +368,7 @@
         <p class="answer-box">حتى تحسّن لغتها الإنكليزية.</p>
         <button id="engBackHome3" class="mini-cta" type="button">رجوع</button>
       </article>`);
-    document.getElementById('engBackHome3')?.addEventListener('click', englishHome);
+    document.getElementById('engBackHome3')?.addEventListener('click', () => englishUnitHome(0));
   }
 
   let engQuizIndex = 0;
@@ -430,6 +426,7 @@
       welcome.classList.add('hidden');
       panel.classList.remove('hidden');
       lessonArea.innerHTML = '';
+      state.englishUnit = null;
       actions.forEach(a => a.disabled = false);
       panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
       if (state.subject === 'physics') physicsHome();
@@ -445,10 +442,11 @@
         if (index === 2) startQuiz();
         if (index === 3) physicsReview();
       } else if (state.subject === 'english') {
+        if (state.englishUnit !== 0) { englishHome(); return; }
         if (index === 0) englishGrammar();
         if (index === 1) englishWords();
         if (index === 2) englishStartQuiz();
-        if (index === 3) englishHome();
+        if (index === 3) englishUnitHome(0);
       }
     });
   });
