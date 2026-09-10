@@ -29,6 +29,7 @@
       <button class="tab active" data-view="home">🏠 الرئيسية</button>
       <button class="tab" data-view="calendar">📅 التقويم</button>
       <button class="tab" data-view="school">🎓 الدراسة</button>
+      <button class="tab tutor-tab" data-view="tutor">🧠 مدرّسي الذكي</button>
       <button class="tab" data-view="life">💜 حياتي</button>
       <button class="tab" data-view="settings">⚙️ الإعدادات</button>
     </nav>
@@ -124,6 +125,50 @@
         </section>
       </section>
 
+      <section id="view-tutor" class="view">
+        <section class="card tutor-hero">
+          <div>
+            <p class="eyebrow">DURRA AI Tutor</p>
+            <h2>🧠 مدرّسي الذكي</h2>
+            <p class="muted">اختاري المادة، وبعدها نبدأ الشرح والمراجعة والاختبار.</p>
+          </div>
+          <span class="tutor-level">⭐ البداية</span>
+        </section>
+
+        <div class="tutor-subjects">
+          <button class="subject-card physics" type="button" data-subject="physics">
+            <span class="subject-icon">⚡</span>
+            <strong>الفيزياء</strong>
+            <small>قانون • مثال • حل • اختبار</small>
+          </button>
+          <button class="subject-card english" type="button" data-subject="english">
+            <span class="subject-icon">🇬🇧</span>
+            <strong>اللغة الإنكليزية</strong>
+            <small>شرح • كلمات • قواعد • اختبار</small>
+          </button>
+        </div>
+
+        <section id="tutorWelcome" class="card tutor-note">
+          <h3>🎯 هدفنا</h3>
+          <p>كل يوم درس صغير واختبار سريع، حتى تصبح الدراسة أخف وأسهل.</p>
+        </section>
+
+        <section id="tutorSubjectPanel" class="card hidden">
+          <div class="section-head">
+            <h3 id="tutorSubjectTitle"></h3>
+            <button id="tutorBack" class="soft-btn" type="button">رجوع</button>
+          </div>
+          <p id="tutorSubjectText" class="muted"></p>
+          <div class="tutor-actions">
+            <button class="tutor-action" type="button">📖 اشرح لي</button>
+            <button class="tutor-action" type="button">🧩 مثال</button>
+            <button class="tutor-action" type="button">⚡ اختبار سريع</button>
+            <button class="tutor-action" type="button">🔁 مراجعة</button>
+          </div>
+          <p class="small muted tutor-coming">الخطوة التالية: نربط هذه الأزرار بدروس السادس العلمي والذكاء الاصطناعي.</p>
+        </section>
+      </section>
+
       <section id="view-life" class="view">
         <div class="grid two">
           <section class="card">
@@ -188,5 +233,6 @@
 
   <script src="./messages.js"></script>
   <script src="./app.js"></script>
+  <script src="./tutor.js"></script>
 </body>
 </html>

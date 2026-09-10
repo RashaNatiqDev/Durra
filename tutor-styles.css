@@ -1,0 +1,17 @@
+/* DURRA AI Tutor — Step 1 */
+.tutor-tab{background:linear-gradient(135deg,#f2edff,#fff0fb)!important;color:var(--brand)!important}
+.tutor-tab.active{background:linear-gradient(135deg,var(--brand),#9e77ff)!important;color:#fff!important}
+.tutor-hero{display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(135deg,#fff 5%,#f2edff 58%,#fff0fb)}
+.tutor-hero h2{margin:0 0 8px;font-size:clamp(1.5rem,4vw,2.2rem)}
+.tutor-level{white-space:nowrap;background:#fff;border:1px solid var(--line);border-radius:999px;padding:9px 13px;font-weight:800;color:var(--brand)}
+.tutor-subjects{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-bottom:18px}
+.subject-card{border:1px solid var(--line);border-radius:24px;padding:25px 18px;text-align:center;background:#fff;box-shadow:var(--shadow);cursor:pointer;color:var(--ink);transition:.18s ease}
+.subject-card:active{transform:scale(.98)}
+.subject-card.physics{background:linear-gradient(145deg,#fff,#fff8e9)}
+.subject-card.english{background:linear-gradient(145deg,#fff,#f1f5ff)}
+.subject-icon{display:block;font-size:2.6rem;margin-bottom:10px}.subject-card strong{display:block;font-size:1.25rem;margin-bottom:7px}.subject-card small{color:var(--muted)}
+.tutor-note{border-style:dashed}.tutor-note p{margin-bottom:0;line-height:1.8}
+.tutor-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
+.tutor-action{border:1px solid var(--line);background:#faf8ff;color:var(--brand);border-radius:15px;padding:14px;font-weight:800;cursor:pointer}
+.tutor-coming{margin-top:16px}
+@media(max-width:600px){.tutor-subjects{grid-template-columns:1fr}.tutor-hero{align-items:flex-start;flex-direction:column}.tutor-actions{grid-template-columns:1fr 1fr}}
