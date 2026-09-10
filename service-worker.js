@@ -1,4 +1,4 @@
-const CACHE_NAME = 'durra-ai-tutor-step1-v2';
+const CACHE_NAME = 'durra-ai-tutor-step2-v1';
 const APP_ASSETS = [
   './',
   './index.html',
