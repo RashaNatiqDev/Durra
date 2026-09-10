@@ -266,6 +266,160 @@
       </article>`);
   }
 
+
+  const physicsChapters = [
+    'الفصل الأول: المتسعات',
+    'الفصل الثاني: الحث الكهرومغناطيسي',
+    'الفصل الثالث: التيار المتناوب',
+    'الفصل الرابع: الموجات الكهرومغناطيسية',
+    'الفصل الخامس: البصريات الفيزيائية',
+    'الفصل السادس: الفيزياء الحديثة',
+    'الفصل السابع: إلكترونيات الحالة الصلبة',
+    'الفصل الثامن: الأطياف الذرية والليزر',
+    'الفصل التاسع: النظرية النسبية',
+    'الفصل العاشر: الفيزياء النووية'
+  ];
+
+  function physicsHome() {
+    const cards = physicsChapters.map((name, i) => `
+      <button class="tutor-action physics-chapter" type="button" data-chapter="${i}">
+        ${i === 0 ? '✅ ' : '📘 '}${name}
+      </button>`).join('');
+    setLesson(`
+      <article class="lesson-card">
+        <div class="lesson-kicker">اختاري الفصل</div>
+        <h4>⚡ فصول الفيزياء</h4>
+        <div class="tutor-actions">${cards}</div>
+        <p class="small muted">الفصل الأول مفعّل الآن بالكامل. بقية الفصول جاهزة للإضافة بالتحديثات القادمة.</p>
+      </article>`);
+    document.querySelectorAll('.physics-chapter').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = Number(btn.dataset.chapter);
+        if (i === 0) physicsExplain();
+        else setLesson(`
+          <article class="lesson-card">
+            <div class="lesson-kicker">${physicsChapters[i]}</div>
+            <h4>📘 هذا الفصل موجود في القائمة</h4>
+            <p>سنضيف له الشرح والقوانين والأمثلة والاختبارات بالتحديثات القادمة، بدون تغيير التطبيق من الصفر.</p>
+            <button id="backPhysicsChapters" class="mini-cta" type="button">رجوع إلى الفصول</button>
+          </article>`);
+        document.getElementById('backPhysicsChapters')?.addEventListener('click', physicsHome);
+      });
+    });
+  }
+
+  const englishQuiz = [
+    { q: 'Choose the correct answer: She ___ to school every day.', options: ['go', 'goes', 'going', 'gone'], answer: 1, why: 'مع she في المضارع البسيط نضيف s للفعل: goes.' },
+    { q: 'What is the meaning of “important”?', options: ['مهم', 'سريع', 'صعب', 'قريب'], answer: 0, why: 'important = مهم.' },
+    { q: 'Choose the correct sentence.', options: ['He study English.', 'He studies English.', 'He studying English.', 'He studied English every day.'], answer: 1, why: 'في المضارع البسيط مع He نستخدم studies.' }
+  ];
+
+  function englishHome() {
+    setLesson(`
+      <article class="lesson-card">
+        <div class="lesson-kicker">English Tutor</div>
+        <h4>🇬🇧 اختاري طريقة الدراسة</h4>
+        <div class="tutor-actions">
+          <button id="engWords" class="tutor-action" type="button">🧠 كلمات</button>
+          <button id="engGrammar" class="tutor-action" type="button">📘 قواعد</button>
+          <button id="engReading" class="tutor-action" type="button">📖 قراءة وفهم</button>
+          <button id="engQuiz" class="tutor-action" type="button">⚡ اختبار سريع</button>
+        </div>
+      </article>`);
+    document.getElementById('engWords')?.addEventListener('click', englishWords);
+    document.getElementById('engGrammar')?.addEventListener('click', englishGrammar);
+    document.getElementById('engReading')?.addEventListener('click', englishReading);
+    document.getElementById('engQuiz')?.addEventListener('click', englishStartQuiz);
+  }
+
+  function englishWords() {
+    setLesson(`
+      <article class="lesson-card">
+        <div class="lesson-kicker">Vocabulary</div>
+        <h4>🧠 كلمات اليوم</h4>
+        <div class="mistake-list">
+          <div class="mistake-item"><b>important</b><span>مهم</span></div>
+          <div class="mistake-item"><b>improve</b><span>يُحسّن / يتطور</span></div>
+          <div class="mistake-item"><b>practice</b><span>يتدرّب / تدريب</span></div>
+          <div class="mistake-item"><b>success</b><span>نجاح</span></div>
+        </div>
+        <button id="engBackHome1" class="mini-cta" type="button">رجوع</button>
+      </article>`);
+    document.getElementById('engBackHome1')?.addEventListener('click', englishHome);
+  }
+
+  function englishGrammar() {
+    setLesson(`
+      <article class="lesson-card">
+        <div class="lesson-kicker">Grammar</div>
+        <h4>📘 قاعدة سريعة: Present Simple</h4>
+        <p>نستخدم المضارع البسيط للعادات والأشياء المتكررة.</p>
+        <div class="law-box"><strong>He / She / It + verb(s)</strong></div>
+        <p><b>مثال:</b> She studies English every day.</p>
+        <p class="memory-tip">🧠 تذكري: مع He / She / It غالبًا نضيف s أو es للفعل.</p>
+        <button id="engBackHome2" class="mini-cta" type="button">رجوع</button>
+      </article>`);
+    document.getElementById('engBackHome2')?.addEventListener('click', englishHome);
+  }
+
+  function englishReading() {
+    setLesson(`
+      <article class="lesson-card">
+        <div class="lesson-kicker">Reading</div>
+        <h4>📖 قراءة قصيرة</h4>
+        <p dir="ltr"><b>Durra studies every day. She wants to improve her English. She practices new words and reads a short text every evening.</b></p>
+        <p><b>السؤال:</b> Why does Durra practice every day?</p>
+        <p class="answer-box">حتى تحسّن لغتها الإنكليزية.</p>
+        <button id="engBackHome3" class="mini-cta" type="button">رجوع</button>
+      </article>`);
+    document.getElementById('engBackHome3')?.addEventListener('click', englishHome);
+  }
+
+  let engQuizIndex = 0;
+  let engQuizScore = 0;
+
+  function englishStartQuiz() {
+    engQuizIndex = 0;
+    engQuizScore = 0;
+    renderEnglishQuiz();
+  }
+
+  function renderEnglishQuiz() {
+    const item = englishQuiz[engQuizIndex];
+    setLesson(`
+      <article class="lesson-card quiz-card">
+        <div class="quiz-top"><span>🇬🇧 English Challenge</span><b>${engQuizIndex + 1} / ${englishQuiz.length}</b></div>
+        <h4>${item.q}</h4>
+        <div class="quiz-options">${item.options.map((o,i)=>`<button class="quiz-option eng-option" type="button" data-choice="${i}">${o}</button>`).join('')}</div>
+        <p id="engFeedback" class="feedback"></p>
+      </article>`);
+    document.querySelectorAll('.eng-option').forEach(btn => btn.addEventListener('click', () => {
+      const choice = Number(btn.dataset.choice);
+      const fb = document.getElementById('engFeedback');
+      document.querySelectorAll('.eng-option').forEach(b => b.disabled = true);
+      if (choice === item.answer) {
+        engQuizScore += 1;
+        addPoints(10);
+        fb.textContent = `🌟 صحيح! ${item.why} +10 نقاط`;
+        fb.className = 'feedback correct';
+      } else {
+        fb.textContent = `💡 ${item.why}`;
+        fb.className = 'feedback wrong';
+      }
+      const next = document.createElement('button');
+      next.className = 'mini-cta';
+      next.textContent = engQuizIndex === englishQuiz.length - 1 ? 'شوفي النتيجة 🏆' : 'السؤال التالي ←';
+      next.addEventListener('click', () => {
+        engQuizIndex += 1;
+        if (engQuizIndex >= englishQuiz.length) {
+          setLesson(`<article class="lesson-card result-card"><div class="big-stars">${engQuizScore === 3 ? '⭐⭐⭐' : engQuizScore === 2 ? '⭐⭐' : '⭐'}</div><h4>نتيجتك ${engQuizScore} من ${englishQuiz.length}</h4><div class="answer-box">🏅 مجموع نقاطك الآن: <b>${getPoints()}</b></div><button id="engQuizAgain" class="mini-cta" type="button">أعيدي الاختبار</button></article>`);
+          document.getElementById('engQuizAgain')?.addEventListener('click', englishStartQuiz);
+        } else renderEnglishQuiz();
+      }, { once:true });
+      fb.after(next);
+    }));
+  }
+
   document.querySelectorAll('[data-subject]').forEach(btn => {
     btn.addEventListener('click', () => {
       const subject = subjects[btn.dataset.subject];
@@ -278,6 +432,8 @@
       lessonArea.innerHTML = '';
       actions.forEach(a => a.disabled = false);
       panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (state.subject === 'physics') physicsHome();
+      if (state.subject === 'english') englishHome();
     });
   });
 
@@ -288,8 +444,11 @@
         if (index === 1) physicsExample();
         if (index === 2) startQuiz();
         if (index === 3) physicsReview();
-      } else {
-        englishPlaceholder();
+      } else if (state.subject === 'english') {
+        if (index === 0) englishGrammar();
+        if (index === 1) englishWords();
+        if (index === 2) englishStartQuiz();
+        if (index === 3) englishHome();
       }
     });
   });
