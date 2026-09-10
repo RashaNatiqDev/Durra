@@ -8,455 +8,153 @@
   const back = document.getElementById('tutorBack');
   const lessonArea = document.getElementById('tutorLessonArea');
   const pointsEl = document.getElementById('tutorPoints');
-  const actions = [...document.querySelectorAll('.tutor-action')];
+  const topActions = [...document.querySelectorAll('#tutorSubjectPanel > .tutor-actions .tutor-action')];
 
-  const KEYS = {
-    points: 'durra_tutor_points_v1',
-    mistakes: 'durra_physics_mistakes_v1',
-    daily: 'durra_physics_daily_v1'
-  };
+  const POINTS_KEY = 'durra_tutor_points_v1';
+  const state = { subject: null, topicIndex: null, quizIndex: 0, quizScore: 0, quizLocked: false, wrong: [] };
 
-  const state = {
-    subject: null,
-    quizIndex: 0,
-    quizScore: 0,
-    quizLocked: false,
-    wrongIds: [],
-    englishUnit: null
-  };
+  const q = (question, options, answer, why) => ({ q: question, options, answer, why });
 
   const subjects = {
-    physics: {
-      title: '⚡ الفيزياء',
-      text: 'نبدأ من الفصل الأول: المتسعات. شرح قصير، قانون، مثال، ثم سؤال تحلينه بنفسك.'
-    },
-    english: {
-      title: '🇬🇧 اللغة الإنكليزية',
-      text: 'قسم الإنكليزي جاهز للمرحلة التالية: كلمات، قواعد، قطع واختبارات قصيرة.'
-    }
+    physics: { title:'⚡ الفيزياء', text:'اختاري الفصل، ثم شرح وقانون ومثال واختبار ومراجعة.', label:'فصول الفيزياء', kind:'الفصل', topics:[
+      {name:'الفصل الأول: المتسعات', summary:'المتسعة أداة تخزن الشحنة والطاقة الكهربائية. السعة تقيس قدرة المتسعة على تخزين الشحنة عند فرق جهد معين.', key:'C = Q ÷ ΔV', example:'إذا كانت Q = 20 μC و ΔV = 4 V فإن C = 5 μF.', quiz:[q('ما وحدة قياس السعة الكهربائية؟',['الفاراد F','الفولت V','الأمبير A','الأوم Ω'],0,'السعة الكهربائية تقاس بالفاراد.'),q('إذا Q = 18 μC و ΔV = 6 V فما C؟',['3 μF','12 μF','24 μF','108 μF'],0,'C = Q/ΔV = 18/6 = 3 μF.')]},
+      {name:'الفصل الثاني: الحث الكهرومغناطيسي', summary:'يدرس تولد القوة الدافعة الكهربائية الحثية عند تغير الفيض المغناطيسي، مع قانون فاراداي واتجاه لينز.', key:'ε = -N ΔΦ ÷ Δt', example:'إذا تغير الفيض بسرعة أكبر تتولد قوة دافعة حثية أكبر، وإشارة السالب تعبّر عن قانون لينز.', quiz:[q('على ماذا تعتمد القوة الدافعة الحثية؟',['معدل تغير الفيض','كتلة السلك فقط','لون السلك','درجة الطول فقط'],0,'وفق قانون فاراداي تعتمد على معدل تغير الفيض.'),q('ماذا تعبّر إشارة السالب في قانون فاراداي؟',['قانون لينز','قانون أوم','قانون كولوم','قانون بويل'],0,'السالب يعبّر عن اتجاه يعاكس سبب التغير وفق لينز.')]},
+      {name:'الفصل الثالث: التيار المتناوب', summary:'التيار المتناوب يتغير مقداره واتجاهه دوريًا، وتستخدم القيم المؤثرة للمقارنة مع التيار المستمر.', key:'Vᵣₘₛ = Vₘₐₓ ÷ √2', example:'إذا Vmax = 100√2 V فإن Vrms = 100 V.', quiz:[q('التيار المتناوب يتميز بأنه؟',['يتغير دوريًا','ثابت دائمًا','لا يملك ترددًا','لا يمر في الدوائر'],0,'التيار المتناوب يتغير مقدارًا واتجاهًا دوريًا.'),q('العلاقة الصحيحة للقيمة المؤثرة للجهد الجيبي هي؟',['Vmax/√2','Vmax×2','Vmax²','Vmax/4'],0,'Vrms = Vmax/√2.')]},
+      {name:'الفصل الرابع: الموجات الكهرومغناطيسية', summary:'الموجات الكهرومغناطيسية تنتشر في الفراغ بسرعة الضوء وتتكون من مجالين كهربائي ومغناطيسي متعامدين.', key:'c = λ f', example:'إذا زاد التردد f عند ثبات سرعة الضوء فإن الطول الموجي λ يقل.', quiz:[q('ما علاقة سرعة الموجة بالطول الموجي والتردد؟',['c = λf','c = λ/f','c = f/λ','c = λ+f'],0,'سرعة الموجة تساوي الطول الموجي في التردد.'),q('هل تحتاج الموجات الكهرومغناطيسية وسطًا ماديًا؟',['لا','نعم دائمًا','في الماء فقط','في الهواء فقط'],0,'يمكنها الانتشار في الفراغ.')]},
+      {name:'الفصل الخامس: البصريات الفيزيائية', summary:'يتناول الطبيعة الموجية للضوء وظواهر التداخل والحيود والاستقطاب.', key:'التداخل ينتج من تراكب موجات ضوئية مترابطة.', example:'في مناطق التداخل البنّاء تزداد الشدة، وفي التداخل الهدّام تقل الشدة.', quiz:[q('أي ظاهرة تُظهر الطبيعة الموجية للضوء بوضوح؟',['التداخل','السقوط الحر','التوصيل','التمدد الحراري'],0,'التداخل من أهم دلائل الطبيعة الموجية.'),q('التداخل البنّاء يؤدي إلى؟',['زيادة الشدة','انعدام الكتلة','انخفاض التردد دائمًا','توقف الضوء'],0,'الموجات تتعاضد فتزداد الشدة.')]},
+      {name:'الفصل السادس: الفيزياء الحديثة', summary:'يتناول مفاهيم الكم والتأثير الكهروضوئي وطاقة الفوتون.', key:'E = h f', example:'كلما زاد تردد الإشعاع زادت طاقة الفوتون لأن E تتناسب طرديًا مع f.', quiz:[q('طاقة الفوتون تساوي؟',['hf','h/f','f/h','h+f'],0,'العلاقة الأساسية E = hf.'),q('عند زيادة التردد ماذا يحدث لطاقة الفوتون؟',['تزداد','تقل','لا تتغير','تصبح صفرًا'],0,'E تتناسب طرديًا مع f.')]},
+      {name:'الفصل السابع: إلكترونيات الحالة الصلبة', summary:'يدرس أشباه الموصلات والثنائيات والترانزستورات وخواص المواد من نوع p و n.', key:'الثنائي يسمح بالتيار أساسًا في اتجاه واحد عند الانحياز الأمامي.', example:'عند توصيل ثنائي بانحياز أمامي مناسب يمر التيار، بينما يعيق الانحياز العكسي التيار غالبًا.', quiz:[q('الثنائي شبه الموصل يستخدم أساسًا من أجل؟',['تمرير التيار باتجاه مناسب','زيادة الكتلة','خفض الجاذبية','قياس الزمن'],0,'الثنائي عنصر إلكتروني اتجاهي.'),q('المادتان p و n هما؟',['نوعان من أشباه الموصلات','نوعان من العوازل فقط','معدنان نقيان','غازان'],0,'تنتجان من تطعيم شبه الموصل.')]},
+      {name:'الفصل الثامن: الأطياف الذرية والليزر', summary:'يربط الأطياف بانتقالات الإلكترونات بين مستويات الطاقة، ويشرح مبدأ الانبعاث المحفز في الليزر.', key:'ΔE = h f', example:'عندما ينتقل إلكترون بين مستويين تختلف طاقته بمقدار يساوي طاقة الفوتون الممتص أو المنبعث.', quiz:[q('طاقة الفوتون في الانتقال الذري ترتبط بـ؟',['فرق مستويات الطاقة','كتلة النواة فقط','ضغط الغاز فقط','حجم الجهاز'],0,'ΔE = hf.'),q('الليزر يعتمد على؟',['الانبعاث المحفز','السقوط الحر','التوصيل الأيوني فقط','الاحتكاك'],0,'الانبعاث المحفز أساس عمل الليزر.')]},
+      {name:'الفصل التاسع: النظرية النسبية', summary:'تتناول مفاهيم الزمن والطول والطاقة عند السرعات العالية، ومن أشهر علاقاتها تكافؤ الكتلة والطاقة.', key:'E = mc²', example:'توضح العلاقة أن مقدارًا صغيرًا من الكتلة يمكن أن يقابل طاقة كبيرة بسبب عامل c².', quiz:[q('علاقة تكافؤ الكتلة والطاقة هي؟',['E=mc²','E=mv','E=m/c','E=c/m'],0,'هذه أشهر علاقات النسبية.'),q('تظهر تأثيرات النسبية الخاصة بوضوح عند سرعات؟',['قريبة من سرعة الضوء','صفر فقط','بطيئة جدًا فقط','سرعة الصوت فقط'],0,'تزداد أهمية التأثيرات عند السرعات العالية جدًا.')]},
+      {name:'الفصل العاشر: الفيزياء النووية', summary:'يدرس تركيب النواة والنشاط الإشعاعي والانحلال وطاقة الربط والتفاعلات النووية.', key:'بعد كل عمر نصف يبقى نصف عدد الأنوية غير المتحللة.', example:'إذا بدأنا بـ 100 نواة مشعة، بعد عمر نصف واحد يبقى 50 تقريبًا، وبعد عمرين نصفين يبقى 25.', quiz:[q('بعد عمر نصف واحد يبقى من الأنوية غير المتحللة؟',['النصف','الربع','الكل','لا شيء دائمًا'],0,'تعريف عمر النصف هو الزمن اللازم لتحلل نصف الأنوية.'),q('النشاط الإشعاعي يرتبط بـ؟',['نواة غير مستقرة','موجة صوتية فقط','احتكاك سطحي','ضغط جوي'],0,'الانحلال الإشعاعي ظاهرة نووية.')]}
+    ]},
+
+    english: { title:'🇬🇧 اللغة الإنكليزية', text:'اختاري الوحدة، ثم كلمات وقواعد وقراءة واختبار ومراجعة.', label:'وحدات اللغة الإنكليزية', kind:'الوحدة', topics:[
+      ...Array.from({length:8},(_,i)=>({name:`Unit ${i+1} • الوحدة ${['الأولى','الثانية','الثالثة','الرابعة','الخامسة','السادسة','السابعة','الثامنة'][i]}`,summary:'الوحدة مهيأة داخل النظام بنفس النمط: مفردات، قواعد، قراءة وفهم، ثم اختبار سريع.',key:'راجعي الكلمات والقاعدة ثم طبقيهما في جملة قصيرة.',example:'Study → practice → answer. اقرئي المثال ثم حاولي تكوين جملة صحيحة من عندك.',quiz:[q('أفضل طريقة لتثبيت مفردة جديدة هي؟',['استخدامها في جملة','قراءتها مرة واحدة فقط','تركها دون مراجعة','حفظ شكلها فقط'],0,'استخدام الكلمة في سياق يساعد على تثبيتها.'),q('بعد دراسة القاعدة الأفضل هو؟',['حل تطبيق قصير','الانتقال بلا تدريب','حفظ الاسم فقط','تجاهل الأخطاء'],0,'التطبيق المباشر يثبت القاعدة.')]})),
+      {name:'Literature • الأدب',summary:'قسم الأدب مهيأ للقراءة والفهم والأسئلة القصيرة والمراجعة.',key:'اقرئي النص، حددي الفكرة، ثم أجيبي من الدليل الموجود في النص.',example:'ابدئي بفهم الفكرة العامة قبل حفظ التفاصيل.',quiz:[q('في سؤال الفهم نبدأ عادةً بـ؟',['فهم الفكرة العامة','حفظ كل كلمة','ترك النص','تخمين الجواب بلا قراءة'],0,'الفكرة العامة توجه بقية الإجابات.'),q('الدليل على الجواب يُفضّل أن يكون؟',['من النص','من التخمين فقط','من عنوان مادة أخرى','من الحفظ العشوائي'],0,'الاستدلال من النص أدق.')]}
+    ]},
+
+    chemistry: { title:'🧪 الكيمياء', text:'اختاري الفصل، ثم شرح الفكرة والقانون أو القاعدة ومثال واختبار ومراجعة.', label:'فصول الكيمياء', kind:'الفصل', topics:[
+      {name:'الفصل الأول: الثرموداينمك',summary:'يدرس الطاقة والحرارة والتغير في الإنثالبي والتفاعلات الماصة والطاردة للحرارة.',key:'ΔH = H النواتج − H المتفاعلات',example:'إذا كانت إنثالبي النواتج أقل من المتفاعلات تكون ΔH سالبة ويكون التفاعل طاردًا للحرارة.',quiz:[q('إذا كانت ΔH سالبة فالتفاعل غالبًا؟',['طارد للحرارة','ماص للحرارة','لا يحدث','متعادل دائمًا'],0,'الإشارة السالبة تعني تحرر حرارة.'),q('ΔH يحسب من؟',['H النواتج − H المتفاعلات','H المتفاعلات − H النواتج دائمًا','الكتلة فقط','الحجم فقط'],0,'هذا هو تعريف تغير الإنثالبي للتفاعل.')]},
+      {name:'الفصل الثاني: الاتزان الكيميائي',summary:'يدرس حالة الاتزان الديناميكي وثابت الاتزان والعوامل المؤثرة في موضع الاتزان.',key:'Kc يكتب من تراكيز النواتج والمتفاعلات مرفوعة لمعاملاتها.',example:'في تفاعل بسيط A ⇌ B يكون Kc = [B]/[A].',quiz:[q('الاتزان الكيميائي يعني أن سرعتي التفاعل الأمامي والعكسي؟',['متساويتان','صفر دائمًا','مختلفتان دائمًا','لا علاقة بينهما'],0,'عند الاتزان تتساوى السرعتان.'),q('ثابت الاتزان Kc يعتمد على؟',['تراكيز مواد الاتزان حسب المعادلة','لون الوعاء','كتلة الجهاز','اسم المختبر'],0,'يكتب من تراكيز المواد الداخلة في تعبير الاتزان.')]},
+      {name:'الفصل الثالث: الاتزان الأيوني',summary:'يتناول تأين الأحماض والقواعد وpH والمحاليل المنظمة والذوبانية.',key:'pH = −log[H⁺]',example:'إذا [H⁺] = 10⁻³ M فإن pH = 3.',quiz:[q('العلاقة الصحيحة لـ pH هي؟',['−log[H⁺]','log[H⁺]','[H⁺]²','1/[H⁺] فقط'],0,'تعريف pH هو اللوغاريتم السالب لتركيز H+.'),q('محلول pH له 3 يعد؟',['حامضيًا','قاعديًا','متعادلًا','فلزيًا'],0,'القيم الأقل من 7 حامضية عند الظروف الاعتيادية.')]},
+      {name:'الفصل الرابع: الكيمياء الكهربائية',summary:'يدرس الأكسدة والاختزال والخلايا الكلفانية والتحليل الكهربائي وجهد الخلية.',key:'Ecell = Ecathode − Eanode',example:'في الخلية الكلفانية تحدث الأكسدة عند الأنود والاختزال عند الكاثود.',quiz:[q('الأكسدة تعني عادةً؟',['فقد إلكترونات','اكتساب إلكترونات','فقد بروتون دائمًا','عدم تغير'],0,'الأكسدة فقد للإلكترونات.'),q('الاختزال يحدث عند؟',['الكاثود','الأنود دائمًا','الجسر الملحي فقط','الوعاء'],0,'الاختزال عند الكاثود.')]},
+      {name:'الفصل الخامس: الكيمياء التناسقية',summary:'يتناول المعقدات التناسقية والفلز المركزي والليكاندات وعدد التناسق.',key:'المعقد يتكون من ذرة/أيون مركزي تحيط به ليكاندات.',example:'الليكاند يمنح زوجًا إلكترونيًا للفلز المركزي لتكوين رابطة تناسقية.',quiz:[q('الليكاند في المعقد التناسقي هو؟',['مانح زوج إلكتروني','نواة ذرة فقط','غاز خامل دائمًا','مذيب فقط'],0,'الليكاند يمنح زوجًا إلكترونيًا للذرة أو الأيون المركزي.'),q('ما الذي يوجد في مركز المعقد عادةً؟',['فلز مركزي','سكر','بروتين','هيدروكربون فقط'],0,'المعقدات التناسقية تحتوي غالبًا ذرة أو أيون فلزي مركزي.')]},
+      {name:'الفصل السادس: الكيمياء التحليلية',summary:'تركز على التعرف على مكونات العينة وقياس كمياتها باستخدام طرائق تحليل نوعي وكمي.',key:'التحليل النوعي يحدد ما الموجود، والكمي يحدد كم مقداره.',example:'المعايرة مثال شائع على التحليل الكمي لتحديد تركيز محلول مجهول.',quiz:[q('التحليل الكمي يهدف إلى؟',['تحديد المقدار أو التركيز','تحديد اللون فقط','تحديد الاسم فقط','إلغاء القياس'],0,'الكمي يهتم بالكمية.'),q('المعايرة تستخدم غالبًا من أجل؟',['تحديد تركيز','قياس الطول','قياس الزمن فقط','تغيير لون الورق'],0,'المعايرة أداة كمية لتحديد تركيز مجهول.')]},
+      {name:'الفصل السابع: الكيمياء العضوية',summary:'تتناول مركبات الكربون والمجاميع الوظيفية والتفاعلات الأساسية للمركبات العضوية.',key:'المجموعة الوظيفية تحدد كثيرًا من خواص وتفاعلات المركب العضوي.',example:'وجود مجموعة OH يميز الكحولات عن كثير من أنواع المركبات الأخرى.',quiz:[q('ما العنصر الأساس في الكيمياء العضوية؟',['الكربون','الحديد','الهيليوم','الصوديوم فقط'],0,'الكيمياء العضوية تركز على مركبات الكربون.'),q('المجموعة الوظيفية تساعد على تحديد؟',['خواص وتفاعلات المركب','كتلة النواة فقط','سرعة الضوء','الضغط الجوي'],0,'لها دور رئيسي في السلوك الكيميائي للمركب.')]},
+      {name:'الفصل الثامن: الكيمياء الحياتية',summary:'تتناول الجزيئات المهمة في الأنظمة الحية مثل الكربوهيدرات والبروتينات والدهون والأحماض النووية.',key:'البروتينات تتكون من وحدات بنائية تسمى الأحماض الأمينية.',example:'الغلوكوز من السكريات البسيطة، والأحماض الأمينية ترتبط لتكوين البروتينات.',quiz:[q('الوحدات البنائية للبروتينات هي؟',['الأحماض الأمينية','الأحماض الدهنية فقط','الأملاح','الفلزات'],0,'البروتينات سلاسل من الأحماض الأمينية.'),q('الغلوكوز يصنف ضمن؟',['الكربوهيدرات','الفلزات','الأملاح فقط','الغازات النبيلة'],0,'الغلوكوز سكر بسيط من الكربوهيدرات.')]}
+    ]},
+
+    math: { title:'➗ الرياضيات', text:'اختاري الفصل، ثم القاعدة أو القانون، مثال محلول، سؤال سريع ومراجعة.', label:'فصول الرياضيات', kind:'الفصل', topics:[
+      {name:'الفصل الأول: الأعداد المركبة',summary:'يدرس العدد المركب بصورته الجبرية وعملياته وخواص الوحدة التخيلية.',key:'z = a + bi ، و i² = −1',example:'(2+3i)+(1−i)=3+2i.',quiz:[q('قيمة i² تساوي؟',['−1','1','0','2'],0,'حسب تعريف الوحدة التخيلية i² = −1.'),q('ناتج (2+i)+(3+2i) هو؟',['5+3i','5+i','6+2i','1+3i'],0,'نجمع الحقيقي مع الحقيقي والتخيلي مع التخيلي.')]},
+      {name:'الفصل الثاني: القطوع المخروطية',summary:'يدرس القطع المكافئ والناقص والزائد وخصائصها ومعادلاتها.',key:'نحدد نوع القطع من شكل المعادلة ومواضع الحدود التربيعية.',example:'المعادلة y² = 4ax تمثل قطعًا مكافئًا محوره على محور x.',quiz:[q('أي مما يلي قطع مخروطي؟',['القطع المكافئ','المكعب فقط','المتجه فقط','المصفوفة فقط'],0,'القطع المكافئ أحد القطوع المخروطية.'),q('المعادلة y²=4ax تمثل؟',['قطعًا مكافئًا','دائرة دائمًا','مستقيمًا','مستوى'],0,'هذه إحدى الصور القياسية للقطع المكافئ.')]},
+      {name:'الفصل الثالث: تطبيقات التفاضل',summary:'يستخدم المشتقة في المماس ومعدل التغير والقيم العظمى والصغرى ورسم السلوك.',key:'عند نقطة قصوى داخلية قابلة للاشتقاق غالبًا نبحث عن f′(x)=0.',example:'إذا f(x)=x² فإن f′(x)=2x، والنقطة الحرجة عند x=0.',quiz:[q('في مسائل القيم القصوى نستخدم أساسًا؟',['المشتقة','الجذر التربيعي فقط','المصفوفة','اللوغاريتم فقط'],0,'المشتقة أداة رئيسية لتحليل التزايد والتناقص والقيم القصوى.'),q('إذا f′(x)>0 على فترة فالدالة غالبًا؟',['متزايدة','متناقصة','ثابتة دائمًا','غير معرفة'],0,'إشارة المشتقة الموجبة تدل على التزايد.')]},
+      {name:'الفصل الرابع: التكامل',summary:'يدرس التكامل غير المحدد والمحدد وتطبيقاته بوصفه عملية عكسية للتفاضل.',key:'∫ xⁿ dx = xⁿ⁺¹/(n+1) + C ، عندما n ≠ −1',example:'∫ x² dx = x³/3 + C.',quiz:[q('التكامل يعد عملية عكسية لـ؟',['التفاضل','الجمع فقط','الضرب فقط','الترتيب'],0,'التكامل والتفاضل عمليتان مترابطتان عكسيًا.'),q('∫ x² dx يساوي؟',['x³/3 + C','2x + C','x²/2 + C','3x + C'],0,'نزيد الأس واحدًا ثم نقسم على الأس الجديد.')]},
+      {name:'الفصل الخامس: المعادلات التفاضلية',summary:'يتناول معادلات تحتوي مشتقات لدالة مجهولة وطرائق إيجاد حلول تحققها.',key:'حل المعادلة التفاضلية هو دالة تحقق المعادلة عند التعويض.',example:'إذا dy/dx = 2x فإن أحد الحلول العامة y = x² + C.',quiz:[q('المعادلة التفاضلية تحتوي على؟',['مشتقات','أرقام فقط بلا متغيرات','مصفوفة فقط','زوايا فقط'],0,'وجود مشتقة لدالة مجهولة هو السمة الأساسية.'),q('إذا dy/dx=2x فإن y يمكن أن تكون؟',['x²+C','2+C','x+C فقط','1/x'],0,'تكامل 2x هو x²+C.')]},
+      {name:'الفصل السادس: الهندسة الفضائية',summary:'يدرس النقاط والمتجهات والمستقيمات والمستويات في الفضاء ثلاثي الأبعاد.',key:'المتجه في الفضاء يمكن تمثيله بثلاث مركبات.',example:'المتجه v=(1,2,3) له مركبات على المحاور x وy وz.',quiz:[q('الهندسة الفضائية تتعامل مع؟',['ثلاثة أبعاد','بعد واحد فقط','الأعداد الصحيحة فقط','الزمن فقط'],0,'الفضاء المعتاد ثلاثي الأبعاد.'),q('كم مركبة للمتجه في فضاء ثلاثي الأبعاد؟',['3','1','2','4 دائمًا'],0,'له مركبات على x وy وz.')]}
+    ]},
+
+    arabic: { title:'📚 اللغة العربية', text:'اختاري الموضوع بالتسلسل، ثم شرح وقاعدة ومثال واختبار ومراجعة.', label:'موضوعات اللغة العربية', kind:'الموضوع', topics:[
+      {name:'1. أسلوب الاستفهام',summary:'يطلب به العلم بشيء مجهول باستعمال أدوات الاستفهام بحسب المطلوب.',key:'من الأدوات: هل، الهمزة، من، ما، متى، أين، كيف، كم، أيّ.',example:'أينَ تسكن؟ — الأداة «أين» للسؤال عن المكان.',quiz:[q('أي كلمة من أدوات الاستفهام؟',['أين','لن','ليت','لكن'],0,'أين أداة استفهام عن المكان.'),q('«متى» تستخدم غالبًا للسؤال عن؟',['الزمان','المكان','العدد','السبب فقط'],0,'متى للسؤال عن الزمان.')]},
+      {name:'2. أسلوب النفي',summary:'أسلوب ينفي وقوع حدث أو ثبوت معنى، وله أدوات تختلف باختلاف الزمن والتركيب.',key:'من أدواته: ما، لا، لم، لن، ليس.',example:'لم يذهبْ الطالبُ. — «لم» تنفي الفعل المضارع وتقلب دلالته إلى الماضي.',quiz:[q('أي أداة مما يلي للنفي؟',['لم','هل','يا','ليت'],0,'لم من أدوات النفي.'),q('«لن» تنفي غالبًا فعلًا في؟',['المستقبل','الماضي فقط','الأمر','النداء'],0,'لن تنفي المضارع وتفيد الاستقبال.')]},
+      {name:'3. التقديم والتأخير',summary:'تغيير الرتبة الأصلية للكلمات لأغراض نحوية أو بلاغية مع بقاء المعنى منضبطًا بالسياق.',key:'قد يتقدم الخبر على المبتدأ أو المفعول على فعله لأغراض يحددها التركيب.',example:'في الدارِ رجلٌ — تقدم الخبر شبه الجملة «في الدار» على المبتدأ.',quiz:[q('في «في الدار رجلٌ» ما المتقدم؟',['الخبر','المبتدأ','الفاعل','المفعول'],0,'شبه الجملة في الدار خبر مقدم.'),q('التقديم والتأخير يتعلق أساسًا بـ؟',['ترتيب عناصر الجملة','عدد الحروف فقط','الإملاء فقط','الوزن الشعري فقط'],0,'هو تغيير في الرتبة التركيبية.')]},
+      {name:'4. التوكيد',summary:'تابع أو أسلوب يرفع الشك ويقوي المعنى، ويكون لفظيًا أو معنويًا.',key:'من ألفاظ التوكيد المعنوي: نفس، عين، كل، جميع بحسب السياق.',example:'حضر المديرُ نفسُهُ. — «نفسه» توكيد معنوي.',quiz:[q('«نفس» قد تأتي في باب؟',['التوكيد','الاستفهام','النداء','النفي'],0,'هي من ألفاظ التوكيد المعنوي.'),q('الغرض من التوكيد هو؟',['تقوية المعنى','نفي المعنى','السؤال','النداء'],0,'التوكيد يثبت المعنى ويزيل الشك.')]},
+      {name:'5. النداء',summary:'أسلوب لطلب إقبال المنادى أو تنبيهه باستخدام أداة نداء.',key:'من أشهر أدوات النداء: يا.',example:'يا طالبُ، اجتهد. — «يا» أداة نداء و«طالب» منادى.',quiz:[q('أشهر أداة نداء هي؟',['يا','هل','لم','لن'],0,'يا أشهر أدوات النداء.'),q('في «يا طالبُ» كلمة طالب هي؟',['منادى','خبر','مفعول به','حال'],0,'تقع بعد أداة النداء وتسمى منادى.')]},
+      {name:'6. التعجب',summary:'أسلوب يدل على الدهشة أو استعظام صفة، وله صيغ قياسية مشهورة.',key:'من صيغتي التعجب القياسيتين: ما أفعله! وأفعلْ به!',example:'ما أجملَ الصدقَ! — صيغة قياسية للتعجب.',quiz:[q('أي صيغة تعجب قياسية؟',['ما أجملَ الصدقَ!','هل جاء؟','لم يأتِ','يا محمد'],0,'ما أفعله من صيغ التعجب القياسية.'),q('التعجب يدل على؟',['الدهشة أو استعظام الصفة','النفي فقط','النداء فقط','الشرط فقط'],0,'هذا هو المعنى العام للتعجب.')]},
+      {name:'7. المدح والذم',summary:'أسلوبان لإنشاء المدح أو الذم بألفاظ وصيغ مخصوصة.',key:'من أفعال المدح والذم: نعمَ وبئسَ.',example:'نِعمَ الخُلُقُ الصدقُ. — أسلوب مدح.',quiz:[q('أي فعل للمدح؟',['نِعمَ','بئسَ','لم','لن'],0,'نعم من أفعال المدح.'),q('«بئس» تستعمل في؟',['الذم','المدح','الاستفهام','النداء'],0,'بئس فعل ذم.')]},
+      {name:'8. التمني والترجي',summary:'التمني طلب أمر محبوب قد يكون بعيدًا، والترجي توقع أمر محبوب ممكن الوقوع غالبًا.',key:'من أدوات التمني «ليت»، ومن أدوات الترجي «لعل».',example:'ليتَ الشبابَ يعودُ — تمني. لعلَّ النجاحَ قريبٌ — ترجي.',quiz:[q('أداة التمني المشهورة هي؟',['ليت','لعل','هل','لم'],0,'ليت من أشهر أدوات التمني.'),q('«لعل» تستعمل غالبًا في؟',['الترجي','النفي','الاستفهام','النداء'],0,'لعل من أدوات الترجي.')]},
+      {name:'9. العرض والتحضيض',summary:'العرض طلب بلين، والتحضيض طلب بقوة وحث، ولهما أدوات معروفة بحسب السياق.',key:'يفرق بينهما من دلالة الأداة والسياق ودرجة الحث.',example:'ألا تزورنا؟ قد تأتي للعرض بحسب السياق.',quiz:[q('العرض يكون طلبًا؟',['بلين','بإنكار فقط','بنفي فقط','بقسم'],0,'العرض طلب برفق ولين.'),q('التحضيض يدل على؟',['الحث القوي','السكوت','النفي المحض','التعريف'],0,'التحضيض فيه حث وتشجيع قوي على الفعل.')]},
+      {name:'10. التحذير والإغراء',summary:'التحذير تنبيه المخاطب إلى مكروه ليتجنبه، والإغراء حثه على أمر محمود ليلتزمه.',key:'التحذير: إياك والكذب. الإغراء: الصدقَ الصدقَ.',example:'إياك والإهمالَ — تحذير. الاجتهادَ الاجتهادَ — إغراء.',quiz:[q('«إياك والكذب» مثال على؟',['التحذير','الإغراء','المدح','التمني'],0,'فيه تنبيه إلى مكروه لتجنبه.'),q('«الصدقَ الصدقَ» مثال على؟',['الإغراء','النفي','الاستفهام','الذم'],0,'فيه حث على أمر محمود.')]},
+      {name:'11. الأدب والنصوص',summary:'مراجعة الكاتب أو الشاعر والعصر والفكرة العامة والصور والمعاني والأسئلة الوزارية.',key:'ابدئي بالفكرة العامة ثم ثبتي الشاهد والمعنى والخصائص.',example:'عند قراءة نص: حددي الفكرة، ثم استخرجي دليلًا من النص يدعم الإجابة.',quiz:[q('أول خطوة مفيدة لفهم النص الأدبي هي؟',['تحديد الفكرة العامة','حفظ كل كلمة فورًا','ترك النص','قراءة السؤال فقط'],0,'الفكرة العامة تساعد على فهم التفاصيل.'),q('الشاهد في سؤال الأدب يجب أن يكون؟',['مرتبطًا بالمطلوب','عشوائيًا','من مادة أخرى','بلا معنى'],0,'الشاهد الصحيح يدعم الإجابة المطلوبة.')]},
+      {name:'12. الإنشاء',summary:'تدريب على بناء موضوع من مقدمة وأفكار مترابطة وخاتمة مع سلامة اللغة والإملاء.',key:'مقدمة قصيرة + أفكار مرتبة + شواهد مناسبة + خاتمة واضحة.',example:'قبل الكتابة اكتبي ثلاث أفكار رئيسية، ثم اجعلي لكل فكرة فقرة قصيرة.',quiz:[q('الإنشاء الجيد يحتاج إلى؟',['ترتيب الأفكار','تكرار جملة واحدة','إهمال الخاتمة دائمًا','كتابة بلا فقرات'],0,'ترتيب الأفكار يجعل الموضوع واضحًا.'),q('أفضل ما يسبق الكتابة هو؟',['مخطط أفكار قصير','البدء العشوائي','حذف المقدمة دائمًا','ترك الموضوع فارغًا'],0,'التخطيط المختصر يوفر الوقت ويحسن الترابط.')]}
+    ]}
   };
 
-  const quiz = [
-    {
-      id: 'q1',
-      q: 'ما وحدة قياس السعة الكهربائية C؟',
-      options: ['الفولت V', 'الفاراد F', 'الكولوم C', 'الأمبير A'],
-      answer: 1,
-      why: 'السعة الكهربائية تقاس بالفاراد (F).'
-    },
-    {
-      id: 'q2',
-      q: 'أي قانون صحيح للسعة الكهربائية؟',
-      options: ['C = Q ÷ ΔV', 'C = Q × ΔV', 'Q = ΔV ÷ C', 'C = ΔV ÷ Q'],
-      answer: 0,
-      why: 'القانون الأساسي: C = Q / ΔV.'
-    },
-    {
-      id: 'q3',
-      q: 'متسعة شحنتها 18 μC وفرق جهدها 6 V. كم سعتها؟',
-      options: ['3 μF', '12 μF', '24 μF', '108 μF'],
-      answer: 0,
-      why: 'C = Q/ΔV = 18/6 = 3 μF.'
-    },
-    {
-      id: 'q4',
-      q: 'إذا C = 4 μF و ΔV = 5 V، فما الشحنة Q؟',
-      options: ['0.8 μC', '9 μC', '20 μC', '25 μC'],
-      answer: 2,
-      why: 'Q = C × ΔV = 4 × 5 = 20 μC.'
-    },
-    {
-      id: 'q5',
-      q: 'في متسعة لوحين متوازيين، إذا زادت المسافة d بين اللوحين وبقيت بقية العوامل ثابتة، ماذا يحدث للسعة؟',
-      options: ['تزداد', 'تقل', 'لا تتغير', 'تصبح صفراً دائماً'],
-      answer: 1,
-      why: 'لأن C = ε₀A/d، فزيادة d تقلل C.'
-    }
-  ];
+  function getPoints(){ return Number(localStorage.getItem(POINTS_KEY) || 0); }
+  function addPoints(n){ localStorage.setItem(POINTS_KEY, String(getPoints()+n)); renderPoints(); }
+  function renderPoints(){ if(pointsEl) pointsEl.textContent=String(getPoints()); }
+  function setLesson(html){ if(!lessonArea) return; lessonArea.innerHTML=html; lessonArea.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  function currentSubject(){ return subjects[state.subject]; }
+  function currentTopic(){ return currentSubject()?.topics[state.topicIndex]; }
+  function mistakesKey(){ return `durra_tutor_mistakes_${state.subject}_${state.topicIndex}`; }
 
-  function getPoints() {
-    return Number(localStorage.getItem(KEYS.points) || 0);
+  function subjectHome(){
+    const s=currentSubject(); if(!s) return;
+    state.topicIndex=null;
+    const cards=s.topics.map((t,i)=>`<button class="tutor-action topic-card" type="button" data-topic="${i}">${i===0?'✅':'📘'} ${t.name}</button>`).join('');
+    setLesson(`<article class="lesson-card"><div class="lesson-kicker">اختاري ${s.kind}</div><h4>${s.label}</h4><div class="tutor-actions">${cards}</div><p class="small muted">كل ${s.kind} يعمل بنفس النظام: شرح → تطبيق → اختبار سريع → مراجعة ونقاط ⭐.</p></article>`);
+    document.querySelectorAll('.topic-card').forEach(btn=>btn.addEventListener('click',()=>topicHome(Number(btn.dataset.topic))));
   }
 
-  function addPoints(n) {
-    const next = getPoints() + n;
-    localStorage.setItem(KEYS.points, String(next));
-    renderPoints();
+  function topicHome(i){
+    state.topicIndex=i;
+    const s=currentSubject(), t=currentTopic();
+    setLesson(`<article class="lesson-card"><div class="lesson-kicker">${t.name}</div><h4>${s.title} • اختاري طريقة الدراسة</h4><div class="tutor-actions"><button id="topicExplain" class="tutor-action" type="button">📖 اشرح لي</button><button id="topicExample" class="tutor-action" type="button">🧩 مثال / تطبيق</button><button id="topicQuiz" class="tutor-action" type="button">⚡ اختبار سريع</button><button id="topicReview" class="tutor-action" type="button">🔁 مراجعة</button></div><button id="topicBack" class="mini-cta" type="button">رجوع إلى القائمة</button></article>`);
+    document.getElementById('topicExplain')?.addEventListener('click',showExplain);
+    document.getElementById('topicExample')?.addEventListener('click',showExample);
+    document.getElementById('topicQuiz')?.addEventListener('click',startTopicQuiz);
+    document.getElementById('topicReview')?.addEventListener('click',showReview);
+    document.getElementById('topicBack')?.addEventListener('click',subjectHome);
   }
 
-  function renderPoints() {
-    if (pointsEl) pointsEl.textContent = String(getPoints());
+  function showExplain(){
+    const t=currentTopic(); if(!t){ subjectHome(); return; }
+    setLesson(`<article class="lesson-card"><div class="lesson-kicker">${t.name}</div><h4>📖 الشرح المبسط</h4><p>${t.summary}</p><div class="law-box"><span>الفكرة / القانون الأساسي</span><strong>${t.key}</strong></div><p class="memory-tip">🧠 افهمي الفكرة أولًا، ثم أعيديها من ذاكرتك بدون النظر.</p><button id="goEx" class="mini-cta" type="button">فهمتُ — أعطني تطبيقًا 🧩</button></article>`);
+    document.getElementById('goEx')?.addEventListener('click',showExample);
   }
 
-  function setLesson(html) {
-    if (!lessonArea) return;
-    lessonArea.innerHTML = html;
-    lessonArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  function showExample(){
+    const t=currentTopic(); if(!t){ subjectHome(); return; }
+    setLesson(`<article class="lesson-card"><div class="lesson-kicker">${t.name}</div><h4>🧩 مثال / تطبيق</h4><div class="answer-box">${t.example}</div><p class="small muted">اقرئي التطبيق مرة، ثم حاولي شرحه بكلماتك قبل الاختبار.</p><button id="goQuiz" class="mini-cta" type="button">اختبار سريع الآن ⚡</button></article>`);
+    document.getElementById('goQuiz')?.addEventListener('click',startTopicQuiz);
   }
 
-  function physicsExplain() {
-    setLesson(`
-      <article class="lesson-card">
-        <div class="lesson-kicker">الفصل الأول • المتسعات</div>
-        <h4>📖 الدرس 1: السعة الكهربائية</h4>
-        <p><b>الفكرة ببساطة:</b> المتسعة تخزن شحنة كهربائية. مقدار قدرتها على التخزين يسمى <b>السعة الكهربائية</b>.</p>
-        <div class="law-box"><span>القانون الأساسي</span><strong>C = Q ÷ ΔV</strong></div>
-        <div class="symbol-grid">
-          <div><b>C</b><small>السعة • فاراد F</small></div>
-          <div><b>Q</b><small>الشحنة • كولوم C</small></div>
-          <div><b>ΔV</b><small>فرق الجهد • فولت V</small></div>
-        </div>
-        <p class="memory-tip">🧠 <b>احفظيها:</b> السعة = الشحنة ÷ فرق الجهد.</p>
-        <details class="extra-law"><summary>⭐ إضافة مهمة للوحين المتوازيين</summary><div class="law-box compact"><strong>C = ε₀ A ÷ d</strong></div><p>تزداد السعة بزيادة مساحة اللوحين A، وتقل بزيادة المسافة d.</p></details>
-        <button class="mini-cta" id="goExample" type="button">فهمتُ — أعطني مثالًا 🧩</button>
-      </article>`);
-    document.getElementById('goExample')?.addEventListener('click', physicsExample);
+  function startTopicQuiz(){
+    const t=currentTopic(); if(!t){ subjectHome(); return; }
+    state.quizIndex=0; state.quizScore=0; state.quizLocked=false; state.wrong=[]; renderTopicQuiz();
   }
 
-  function physicsExample() {
-    setLesson(`
-      <article class="lesson-card">
-        <div class="lesson-kicker">مثال محلول خطوة بخطوة</div>
-        <h4>🧩 احسبي السعة</h4>
-        <p>متسعة شحنتها <b>Q = 12 μC</b> وفرق الجهد بين لوحيها <b>ΔV = 6 V</b>. أوجدي السعة.</p>
-        <ol class="solve-steps">
-          <li><b>نكتب القانون:</b> C = Q ÷ ΔV</li>
-          <li><b>نعوض:</b> C = 12 ÷ 6</li>
-          <li><b>الناتج:</b> C = 2 μF</li>
-        </ol>
-        <div class="answer-box">✅ الجواب: <b>2 μF</b></div>
-        <p class="small muted">لأن استخدام μC مع V هنا يعطي الناتج مباشرة بوحدة μF.</p>
-        <div class="try-box">
-          <b>🎯 دور دُرّة:</b>
-          <p>إذا كانت Q = 20 μC و ΔV = 4 V، فما C؟</p>
-          <div class="try-row"><input id="tryAnswer" inputmode="decimal" placeholder="اكتبي الرقم فقط"><button id="checkTry" type="button">تحقق</button></div>
-          <p id="tryFeedback" class="feedback"></p>
-        </div>
-      </article>`);
-
-    document.getElementById('checkTry')?.addEventListener('click', () => {
-      const input = document.getElementById('tryAnswer');
-      const fb = document.getElementById('tryFeedback');
-      const value = Number(String(input.value).replace('،', '.'));
-      if (value === 5) {
-        fb.textContent = '🌟 ممتاز! C = 20 ÷ 4 = 5 μF. +10 نقاط';
-        fb.className = 'feedback correct';
-        if (!input.dataset.rewarded) {
-          input.dataset.rewarded = '1';
-          addPoints(10);
-        }
-      } else if (!input.value.trim()) {
-        fb.textContent = 'اكتبي الناتج أولًا 😊';
-        fb.className = 'feedback';
-      } else {
-        fb.textContent = 'قريبة! استخدمي C = Q ÷ ΔV، يعني 20 ÷ 4.';
-        fb.className = 'feedback wrong';
-      }
-    });
+  function renderTopicQuiz(){
+    const t=currentTopic(), item=t.quiz[state.quizIndex];
+    setLesson(`<article class="lesson-card quiz-card"><div class="quiz-top"><span>⚡ ${t.name}</span><b>${state.quizIndex+1} / ${t.quiz.length}</b></div><div class="quiz-progress"><i style="width:${((state.quizIndex+1)/t.quiz.length)*100}%"></i></div><h4>${item.q}</h4><div class="quiz-options">${item.options.map((o,i)=>`<button class="quiz-option" type="button" data-choice="${i}">${o}</button>`).join('')}</div><p id="quizFeedback" class="feedback"></p><button id="nextQuiz" class="mini-cta hidden" type="button">السؤال التالي ←</button></article>`);
+    document.querySelectorAll('.quiz-option').forEach(btn=>btn.addEventListener('click',()=>answerTopicQuiz(Number(btn.dataset.choice))));
   }
 
-  function startQuiz() {
-    state.quizIndex = 0;
-    state.quizScore = 0;
-    state.quizLocked = false;
-    state.wrongIds = [];
-    renderQuizQuestion();
+  function answerTopicQuiz(choice){
+    if(state.quizLocked) return; state.quizLocked=true;
+    const t=currentTopic(), item=t.quiz[state.quizIndex], fb=document.getElementById('quizFeedback');
+    document.querySelectorAll('.quiz-option').forEach((btn,i)=>{ btn.disabled=true; if(i===item.answer) btn.classList.add('is-correct'); if(i===choice && i!==item.answer) btn.classList.add('is-wrong'); });
+    if(choice===item.answer){ state.quizScore++; addPoints(10); fb.textContent=`🌟 صحيح! ${item.why} +10 نقاط`; fb.className='feedback correct'; }
+    else { state.wrong.push(state.quizIndex); fb.textContent=`💡 ${item.why}`; fb.className='feedback wrong'; }
+    const next=document.getElementById('nextQuiz'); next.classList.remove('hidden'); next.textContent=state.quizIndex===t.quiz.length-1?'شوفي النتيجة 🏆':'السؤال التالي ←';
+    next.addEventListener('click',()=>{ state.quizIndex++; state.quizLocked=false; if(state.quizIndex>=t.quiz.length) finishTopicQuiz(); else renderTopicQuiz(); },{once:true});
   }
 
-  function renderQuizQuestion() {
-    const item = quiz[state.quizIndex];
-    const number = state.quizIndex + 1;
-    const optionsHtml = item.options.map((opt, i) => `<button class="quiz-option" type="button" data-choice="${i}">${opt}</button>`).join('');
-    setLesson(`
-      <article class="lesson-card quiz-card">
-        <div class="quiz-top"><span>⚡ تحدي اليوم</span><b>${number} / ${quiz.length}</b></div>
-        <div class="quiz-progress"><i style="width:${(number / quiz.length) * 100}%"></i></div>
-        <h4>${item.q}</h4>
-        <div class="quiz-options">${optionsHtml}</div>
-        <p id="quizFeedback" class="feedback"></p>
-        <button id="nextQuiz" class="mini-cta hidden" type="button">السؤال التالي ←</button>
-      </article>`);
-
-    document.querySelectorAll('.quiz-option').forEach(btn => {
-      btn.addEventListener('click', () => answerQuiz(Number(btn.dataset.choice)));
-    });
+  function finishTopicQuiz(){
+    const t=currentTopic(); localStorage.setItem(mistakesKey(),JSON.stringify(state.wrong));
+    const stars=state.quizScore===t.quiz.length?'⭐⭐⭐':state.quizScore>=Math.ceil(t.quiz.length/2)?'⭐⭐':'⭐';
+    setLesson(`<article class="lesson-card result-card"><div class="big-stars">${stars}</div><h4>نتيجتك ${state.quizScore} من ${t.quiz.length}</h4><p>${state.quizScore===t.quiz.length?'ممتاز! أتقنتِ هذا الجزء.':'راجعي السؤال الذي أخطأتِ به ثم أعيدي التحدي.'}</p><div class="answer-box">🏅 مجموع نقاطك: <b>${getPoints()}</b></div><div class="result-actions"><button id="reviewNow" type="button">🔁 مراجعة</button><button id="retryNow" type="button">⚡ أعيدي الاختبار</button></div></article>`);
+    document.getElementById('reviewNow')?.addEventListener('click',showReview); document.getElementById('retryNow')?.addEventListener('click',startTopicQuiz);
   }
 
-  function answerQuiz(choice) {
-    if (state.quizLocked) return;
-    state.quizLocked = true;
-    const item = quiz[state.quizIndex];
-    const fb = document.getElementById('quizFeedback');
-    const optionButtons = [...document.querySelectorAll('.quiz-option')];
-    optionButtons.forEach((btn, i) => {
-      btn.disabled = true;
-      if (i === item.answer) btn.classList.add('is-correct');
-      if (i === choice && i !== item.answer) btn.classList.add('is-wrong');
-    });
-
-    if (choice === item.answer) {
-      state.quizScore += 1;
-      addPoints(10);
-      fb.textContent = `🌟 صحيح! ${item.why} +10 نقاط`;
-      fb.className = 'feedback correct';
-    } else {
-      state.wrongIds.push(item.id);
-      fb.textContent = `💡 مو مشكلة. ${item.why}`;
-      fb.className = 'feedback wrong';
-    }
-
-    const next = document.getElementById('nextQuiz');
-    next.classList.remove('hidden');
-    next.textContent = state.quizIndex === quiz.length - 1 ? 'شوفي النتيجة 🏆' : 'السؤال التالي ←';
-    next.addEventListener('click', () => {
-      state.quizIndex += 1;
-      state.quizLocked = false;
-      if (state.quizIndex >= quiz.length) finishQuiz();
-      else renderQuizQuestion();
-    }, { once: true });
+  function showReview(){
+    const t=currentTopic(); if(!t){ subjectHome(); return; }
+    let wrong=[]; try{ wrong=JSON.parse(localStorage.getItem(mistakesKey())||'[]'); }catch(_){ }
+    const wrongHtml=wrong.length?`<div class="mistake-list"><h5>راجعي هذه النقاط:</h5>${wrong.map(i=>`<div class="mistake-item"><b>• ${t.quiz[i].q}</b><span>${t.quiz[i].why}</span></div>`).join('')}</div>`:`<p class="success-note">🌟 لا توجد أخطاء محفوظة في آخر اختبار لهذا الموضوع.</p>`;
+    setLesson(`<article class="lesson-card"><div class="lesson-kicker">${t.name}</div><h4>🔁 مراجعة سريعة</h4><div class="flashcard"><p>حاولي تذكر الفكرة أولًا 👀</p><button id="revealKey" type="button">أظهر الفكرة / القانون</button><strong id="hiddenLaw" class="hidden-law">${t.key}</strong></div>${wrongHtml}<button id="reviewQuiz" class="mini-cta" type="button">اختبار سريع الآن ⚡</button></article>`);
+    document.getElementById('revealKey')?.addEventListener('click',()=>document.getElementById('hiddenLaw')?.classList.add('show')); document.getElementById('reviewQuiz')?.addEventListener('click',startTopicQuiz);
   }
 
-  function finishQuiz() {
-    const stars = state.quizScore === 5 ? '⭐⭐⭐' : state.quizScore >= 3 ? '⭐⭐' : '⭐';
-    localStorage.setItem(KEYS.mistakes, JSON.stringify(state.wrongIds));
-    const today = new Date().toISOString().slice(0, 10);
-    localStorage.setItem(KEYS.daily, JSON.stringify({ date: today, score: state.quizScore, total: quiz.length }));
-    const message = state.quizScore === 5 ? 'رائعة! أتقنتِ الدرس.' : state.quizScore >= 3 ? 'جيد جدًا! راجعي الخطأ ونكررها.' : 'نرجع للقانون دقيقة ثم نجرب مرة ثانية.';
-    setLesson(`
-      <article class="lesson-card result-card">
-        <div class="big-stars">${stars}</div>
-        <h4>نتيجتك ${state.quizScore} من ${quiz.length}</h4>
-        <p>${message}</p>
-        <div class="answer-box">🏅 مجموع نقاطك الآن: <b>${getPoints()}</b></div>
-        <div class="result-actions"><button id="reviewMistakes" type="button">🔁 راجعي أخطاءك</button><button id="retryQuiz" type="button">⚡ أعيدي التحدي</button></div>
-      </article>`);
-    document.getElementById('reviewMistakes')?.addEventListener('click', physicsReview);
-    document.getElementById('retryQuiz')?.addEventListener('click', startQuiz);
-  }
+  document.querySelectorAll('[data-subject]').forEach(btn=>btn.addEventListener('click',()=>{
+    const s=subjects[btn.dataset.subject]; if(!s) return;
+    state.subject=btn.dataset.subject; state.topicIndex=null; title.textContent=s.title; text.textContent=s.text; welcome.classList.add('hidden'); panel.classList.remove('hidden'); lessonArea.innerHTML=''; topActions.forEach(a=>a.disabled=false); panel.scrollIntoView({behavior:'smooth',block:'start'}); subjectHome();
+  }));
 
-  function physicsReview() {
-    let mistakes = [];
-    try { mistakes = JSON.parse(localStorage.getItem(KEYS.mistakes) || '[]'); } catch (_) {}
-    const wrongQuestions = quiz.filter(q => mistakes.includes(q.id));
-    const reviewHtml = wrongQuestions.length
-      ? `<div class="mistake-list"><h5>أسئلة تحتاج مراجعة:</h5>${wrongQuestions.map(q => `<div class="mistake-item"><b>• ${q.q}</b><span>${q.why}</span></div>`).join('')}</div>`
-      : `<p class="success-note">🌟 لا توجد أخطاء محفوظة من آخر اختبار.</p>`;
+  topActions.forEach((btn,index)=>btn.addEventListener('click',()=>{
+    if(state.topicIndex===null){ subjectHome(); return; }
+    if(index===0) showExplain(); if(index===1) showExample(); if(index===2) startTopicQuiz(); if(index===3) showReview();
+  }));
 
-    setLesson(`
-      <article class="lesson-card">
-        <div class="lesson-kicker">مراجعة سريعة • 60 ثانية</div>
-        <h4>🔁 بطاقة القانون</h4>
-        <div class="flashcard">
-          <p>قولي القانون من ذاكرتك أولًا 👀</p>
-          <button id="revealLaw" type="button">أظهر القانون</button>
-          <strong id="hiddenLaw" class="hidden-law">C = Q ÷ ΔV</strong>
-        </div>
-        ${reviewHtml}
-        <button id="reviewQuiz" class="mini-cta" type="button">اختبار سريع الآن ⚡</button>
-      </article>`);
-    document.getElementById('revealLaw')?.addEventListener('click', () => document.getElementById('hiddenLaw')?.classList.add('show'));
-    document.getElementById('reviewQuiz')?.addEventListener('click', startQuiz);
-  }
-
-  const englishUnits = [
-    'Unit 1 • الوحدة الأولى',
-    'Unit 2 • الوحدة الثانية',
-    'Unit 3 • الوحدة الثالثة',
-    'Unit 4 • الوحدة الرابعة',
-    'Unit 5 • الوحدة الخامسة',
-    'Unit 6 • الوحدة السادسة',
-    'Unit 7 • الوحدة السابعة',
-    'Unit 8 • الوحدة الثامنة',
-    'Literature • الأدب'
-  ];
-
-  function englishHome() {
-    state.englishUnit = null;
-    const cards = englishUnits.map((name, i) => `
-      <button class="tutor-action english-unit" type="button" data-unit="${i}">
-        ${i === 0 ? '✅ ' : i === 8 ? '📚 ' : '📘 '}${name}
-      </button>`).join('');
-    setLesson(`
-      <article class="lesson-card">
-        <div class="lesson-kicker">اختاري الوحدة</div>
-        <h4>🇬🇧 وحدات اللغة الإنكليزية</h4>
-        <div class="tutor-actions">${cards}</div>
-        <p class="small muted">الوحدة الأولى مفعّلة الآن كنموذج كامل. بقية الوحدات والأدب موجودة بنفس النمط وجاهزة لإضافة محتواها بالتحديثات القادمة.</p>
-      </article>`);
-    document.querySelectorAll('.english-unit').forEach(btn => {
-      btn.addEventListener('click', () => englishUnitHome(Number(btn.dataset.unit)));
-    });
-  }
-
-  function englishUnitHome(unitIndex) {
-    state.englishUnit = unitIndex;
-    const name = englishUnits[unitIndex];
-    if (unitIndex !== 0) {
-      setLesson(`
-        <article class="lesson-card">
-          <div class="lesson-kicker">${name}</div>
-          <h4>${unitIndex === 8 ? '📚 الأدب الإنكليزي' : '🇬🇧 ' + name}</h4>
-          <p>هذه الوحدة موجودة الآن داخل النظام بنفس نمط الفيزياء. سنملأها بالتدريج: شرح، كلمات، قواعد، قراءة، أسئلة واختبار.</p>
-          <div class="tutor-actions">
-            <button class="tutor-action" type="button" disabled>📖 شرح</button>
-            <button class="tutor-action" type="button" disabled>🧠 كلمات</button>
-            <button class="tutor-action" type="button" disabled>📘 قواعد</button>
-            <button class="tutor-action" type="button" disabled>⚡ اختبار</button>
-          </div>
-          <button id="engBackUnits" class="mini-cta" type="button">رجوع إلى الوحدات</button>
-        </article>`);
-      document.getElementById('engBackUnits')?.addEventListener('click', englishHome);
-      return;
-    }
-
-    setLesson(`
-      <article class="lesson-card">
-        <div class="lesson-kicker">Unit 1 • الوحدة الأولى</div>
-        <h4>🇬🇧 اختاري طريقة الدراسة</h4>
-        <div class="tutor-actions">
-          <button id="engWords" class="tutor-action" type="button">🧠 كلمات</button>
-          <button id="engGrammar" class="tutor-action" type="button">📘 قواعد</button>
-          <button id="engReading" class="tutor-action" type="button">📖 قراءة وفهم</button>
-          <button id="engQuiz" class="tutor-action" type="button">⚡ اختبار سريع</button>
-        </div>
-        <button id="engBackUnits" class="mini-cta" type="button">رجوع إلى الوحدات</button>
-      </article>`);
-    document.getElementById('engWords')?.addEventListener('click', englishWords);
-    document.getElementById('engGrammar')?.addEventListener('click', englishGrammar);
-    document.getElementById('engReading')?.addEventListener('click', englishReading);
-    document.getElementById('engQuiz')?.addEventListener('click', englishStartQuiz);
-    document.getElementById('engBackUnits')?.addEventListener('click', englishHome);
-  }
-
-  function englishWords() {
-    setLesson(`
-      <article class="lesson-card">
-        <div class="lesson-kicker">Vocabulary</div>
-        <h4>🧠 كلمات اليوم</h4>
-        <div class="mistake-list">
-          <div class="mistake-item"><b>important</b><span>مهم</span></div>
-          <div class="mistake-item"><b>improve</b><span>يُحسّن / يتطور</span></div>
-          <div class="mistake-item"><b>practice</b><span>يتدرّب / تدريب</span></div>
-          <div class="mistake-item"><b>success</b><span>نجاح</span></div>
-        </div>
-        <button id="engBackHome1" class="mini-cta" type="button">رجوع</button>
-      </article>`);
-    document.getElementById('engBackHome1')?.addEventListener('click', () => englishUnitHome(0));
-  }
-
-  function englishGrammar() {
-    setLesson(`
-      <article class="lesson-card">
-        <div class="lesson-kicker">Grammar</div>
-        <h4>📘 قاعدة سريعة: Present Simple</h4>
-        <p>نستخدم المضارع البسيط للعادات والأشياء المتكررة.</p>
-        <div class="law-box"><strong>He / She / It + verb(s)</strong></div>
-        <p><b>مثال:</b> She studies English every day.</p>
-        <p class="memory-tip">🧠 تذكري: مع He / She / It غالبًا نضيف s أو es للفعل.</p>
-        <button id="engBackHome2" class="mini-cta" type="button">رجوع</button>
-      </article>`);
-    document.getElementById('engBackHome2')?.addEventListener('click', () => englishUnitHome(0));
-  }
-
-  function englishReading() {
-    setLesson(`
-      <article class="lesson-card">
-        <div class="lesson-kicker">Reading</div>
-        <h4>📖 قراءة قصيرة</h4>
-        <p dir="ltr"><b>Durra studies every day. She wants to improve her English. She practices new words and reads a short text every evening.</b></p>
-        <p><b>السؤال:</b> Why does Durra practice every day?</p>
-        <p class="answer-box">حتى تحسّن لغتها الإنكليزية.</p>
-        <button id="engBackHome3" class="mini-cta" type="button">رجوع</button>
-      </article>`);
-    document.getElementById('engBackHome3')?.addEventListener('click', () => englishUnitHome(0));
-  }
-
-  let engQuizIndex = 0;
-  let engQuizScore = 0;
-
-  function englishStartQuiz() {
-    engQuizIndex = 0;
-    engQuizScore = 0;
-    renderEnglishQuiz();
-  }
-
-  function renderEnglishQuiz() {
-    const item = englishQuiz[engQuizIndex];
-    setLesson(`
-      <article class="lesson-card quiz-card">
-        <div class="quiz-top"><span>🇬🇧 English Challenge</span><b>${engQuizIndex + 1} / ${englishQuiz.length}</b></div>
-        <h4>${item.q}</h4>
-        <div class="quiz-options">${item.options.map((o,i)=>`<button class="quiz-option eng-option" type="button" data-choice="${i}">${o}</button>`).join('')}</div>
-        <p id="engFeedback" class="feedback"></p>
-      </article>`);
-    document.querySelectorAll('.eng-option').forEach(btn => btn.addEventListener('click', () => {
-      const choice = Number(btn.dataset.choice);
-      const fb = document.getElementById('engFeedback');
-      document.querySelectorAll('.eng-option').forEach(b => b.disabled = true);
-      if (choice === item.answer) {
-        engQuizScore += 1;
-        addPoints(10);
-        fb.textContent = `🌟 صحيح! ${item.why} +10 نقاط`;
-        fb.className = 'feedback correct';
-      } else {
-        fb.textContent = `💡 ${item.why}`;
-        fb.className = 'feedback wrong';
-      }
-      const next = document.createElement('button');
-      next.className = 'mini-cta';
-      next.textContent = engQuizIndex === englishQuiz.length - 1 ? 'شوفي النتيجة 🏆' : 'السؤال التالي ←';
-      next.addEventListener('click', () => {
-        engQuizIndex += 1;
-        if (engQuizIndex >= englishQuiz.length) {
-          setLesson(`<article class="lesson-card result-card"><div class="big-stars">${engQuizScore === 3 ? '⭐⭐⭐' : engQuizScore === 2 ? '⭐⭐' : '⭐'}</div><h4>نتيجتك ${engQuizScore} من ${englishQuiz.length}</h4><div class="answer-box">🏅 مجموع نقاطك الآن: <b>${getPoints()}</b></div><button id="engQuizAgain" class="mini-cta" type="button">أعيدي الاختبار</button></article>`);
-          document.getElementById('engQuizAgain')?.addEventListener('click', englishStartQuiz);
-        } else renderEnglishQuiz();
-      }, { once:true });
-      fb.after(next);
-    }));
-  }
-
-  document.querySelectorAll('[data-subject]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const subject = subjects[btn.dataset.subject];
-      if (!subject) return;
-      state.subject = btn.dataset.subject;
-      title.textContent = subject.title;
-      text.textContent = subject.text;
-      welcome.classList.add('hidden');
-      panel.classList.remove('hidden');
-      lessonArea.innerHTML = '';
-      state.englishUnit = null;
-      actions.forEach(a => a.disabled = false);
-      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      if (state.subject === 'physics') physicsHome();
-      if (state.subject === 'english') englishHome();
-    });
-  });
-
-  actions.forEach((btn, index) => {
-    btn.addEventListener('click', () => {
-      if (state.subject === 'physics') {
-        if (index === 0) physicsExplain();
-        if (index === 1) physicsExample();
-        if (index === 2) startQuiz();
-        if (index === 3) physicsReview();
-      } else if (state.subject === 'english') {
-        if (state.englishUnit !== 0) { englishHome(); return; }
-        if (index === 0) englishGrammar();
-        if (index === 1) englishWords();
-        if (index === 2) englishStartQuiz();
-        if (index === 3) englishUnitHome(0);
-      }
-    });
-  });
-
-  back?.addEventListener('click', () => {
-    panel.classList.add('hidden');
-    welcome.classList.remove('hidden');
-    state.subject = null;
-    if (lessonArea) lessonArea.innerHTML = '';
-  });
-
+  back?.addEventListener('click',()=>{ panel.classList.add('hidden'); welcome.classList.remove('hidden'); state.subject=null; state.topicIndex=null; if(lessonArea) lessonArea.innerHTML=''; });
   renderPoints();
 })();
