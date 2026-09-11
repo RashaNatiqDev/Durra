@@ -12,7 +12,7 @@
   <link rel="manifest" href="./manifest.json" />
   <link rel="apple-touch-icon" href="./icons/icon-192.png" />
   <link rel="icon" href="./icons/icon-192.png" />
-  <link rel="stylesheet" href="./styles.css?v=20260910-step5fix" />
+  <link rel="stylesheet" href="./styles.css?v=20260911-step7" />
 </head>
 <body>
   <div class="app-shell">
@@ -131,7 +131,7 @@
             <p class="eyebrow">DURRA AI Tutor</p>
             <h2>🧠 مدرّسي الذكي</h2>
             <p class="muted">اختاري المادة، وبعدها نبدأ الشرح والمراجعة والاختبار.</p>
-            <p class="small muted" style="margin-top:4px">نسخة المواد 6.0</p>
+            <p class="small muted" style="margin-top:4px">نسخة المواد 7.0 • AI Ready</p>
           </div>
           <span class="tutor-level" id="tutorLevel">⭐ البداية • <b id="tutorPoints">0</b> نقطة</span>
         </section>
@@ -175,13 +175,21 @@
             <button id="tutorBack" class="soft-btn" type="button">رجوع</button>
           </div>
           <p id="tutorSubjectText" class="muted"></p>
-          <div class="tutor-actions">
+          <div id="tutorQuickActions" class="tutor-actions hidden">
             <button class="tutor-action" type="button">📖 اشرح لي</button>
             <button class="tutor-action" type="button">🧩 مثال</button>
-            <button class="tutor-action" type="button">⚡ اختبار سريع</button>
-            <button class="tutor-action" type="button">🔁 مراجعة</button>
+            <button class="tutor-action" type="button">⚡ اختبار متجدد</button>
+            <button class="tutor-action" type="button">🔁 مراجعة ذكية</button>
           </div>
-          <p class="small muted tutor-coming">📘 الفيزياء — السادس العلمي العراقي • الفصل الأول: المتسعات</p><div id="tutorLessonArea" class="tutor-lesson-area" aria-live="polite"></div>
+          <p id="tutorContext" class="small muted tutor-coming">اختاري المادة ثم الفصل أو الوحدة.</p>
+          <div id="tutorAiBadge" class="ai-mode-badge local">🟡 الوضع المحلي الموسّع</div>
+          <div id="tutorLessonArea" class="tutor-lesson-area" aria-live="polite"></div>
+          <section id="tutorAskBox" class="ai-ask-box hidden">
+            <label for="tutorQuestion"><b>💬 اسألي مدرّسك عن هذا الدرس</b></label>
+            <textarea id="tutorQuestion" rows="3" maxlength="800" placeholder="مثلاً: لم أفهم القانون، اشرحه لي بطريقة أسهل…"></textarea>
+            <button id="tutorAskBtn" class="primary-btn" type="button">🧠 اسأل المدرّس</button>
+            <div id="tutorAskAnswer" class="ai-answer hidden" aria-live="polite"></div>
+          </section>
         </section>
       </section>
 
@@ -223,6 +231,21 @@
           </section>
         </div>
 
+
+        <section class="card ai-settings-card">
+          <div class="section-head"><h3>🧠 ربط المدرّس بالذكاء الاصطناعي</h3><span id="aiSettingsBadge" class="pill">غير مفعّل</span></div>
+          <p class="muted">يعمل DURRA بدون إنترنت بوضع محلي موسّع. وعند ربط خدمة AI الآمنة يصبح الشرح أطول، والأمثلة والاختبارات متجددة، والمراجعة تتكيّف مع أخطاء دُرّة.</p>
+          <label class="field-label" for="aiApiUrl">رابط خدمة DURRA AI</label>
+          <input id="aiApiUrl" inputmode="url" placeholder="https://your-worker.workers.dev" autocomplete="off" />
+          <label class="field-label" for="aiAccessCode">رمز الربط الخاص</label>
+          <input id="aiAccessCode" type="password" maxlength="120" placeholder="رمز خاص لا يحتوي مفتاح OpenAI" autocomplete="off" />
+          <div class="button-stack">
+            <button id="saveAiSettings" class="primary-btn" type="button">حفظ واختبار الاتصال</button>
+            <button id="clearAiSettings" class="soft-btn" type="button">استخدام الوضع المحلي</button>
+          </div>
+          <div id="aiConnectionStatus" class="status-box">الوضع المحلي يعمل الآن.</div>
+        </section>
+
         <section class="card danger-zone">
           <h3>🧹 إعادة ضبط البيانات</h3>
           <p class="muted">يحذف كل بيانات DURRA من هذا الجهاز فقط.</p>
@@ -231,7 +254,7 @@
       </section>
     </main>
 
-    <footer>صُمم بمحبة لدُرّة 💜 — DURRA FINAL</footer>
+    <footer>صُمم بمحبة لدُرّة 💜 — DURRA AI TUTOR 7.0</footer>
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -249,6 +272,7 @@
 
   <script src="./messages.js"></script>
   <script src="./app.js"></script>
-  <script src="./tutor-v6.js?v=20260910-step6fix"></script>
+  <script src="./ai-config.js?v=20260911-step7"></script>
+  <script src="./tutor-v7.js?v=20260911-step7"></script>
 </body>
 </html>
