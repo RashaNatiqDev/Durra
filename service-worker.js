@@ -1,5 +1,5 @@
-const CACHE_NAME = 'durra-ai-tutor-v9-20260911-step7';
-const CORE = ['./','./index.html','./styles.css','./app.js','./messages.js','./ai-config.js','./tutor-v7.js','./manifest.json','./icons/icon-192.png','./icons/icon-512.png'];
+const CACHE_NAME = 'durra-ai-tutor-v10-20260911-step8free';
+const CORE = ['./','./index.html','./styles.css','./app.js','./messages.js','./ai-config.js','./tutor-v8.js','./manifest.json','./icons/icon-192.png','./icons/icon-512.png'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(CORE)).catch(()=>null).then(()=>self.skipWaiting()));
